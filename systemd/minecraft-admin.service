@@ -1,0 +1,21 @@
+[Unit]
+Description=Minecraft Admin FastAPI Service
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/minecraft-admin
+
+# Activate venv + run uvicorn
+ExecStart=/home/ubuntu/minecraft-admin/venv/bin/python -m uvicorn app:app --host 127.0.0.1 --port 8050
+
+# Restart if it crashes
+Restart=always
+RestartSec=3
+
+# Optional: environment variables
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
