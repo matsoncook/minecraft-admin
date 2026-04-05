@@ -5,6 +5,7 @@ After=network.target
 [Service]
 User=ubuntu
 Group=ubuntu
+EnvironmentFile=/home/ubuntu/minecraft-admin/systemd/environment.env
 WorkingDirectory=/home/ubuntu/minecraft-admin
 
 # Activate venv + run uvicorn
