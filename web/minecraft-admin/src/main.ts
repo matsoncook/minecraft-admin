@@ -8,31 +8,6 @@ type PlayersResponse = {
   note?: string
 }
 
-const app = document.querySelector<HTMLDivElement>('#app')
-if (!app) {
-  throw new Error('Missing #app element')
-}
-
-app.innerHTML = `
-  <main class="dashboard">
-    <section class="card">
-      <h1>Minecraft Admin</h1>
-      <p class="subtitle">Current online players from <code>app.py</code></p>
-      <div class="actions">
-        <button id="refresh-all" type="button">Refresh</button>
-      </div>
-      <p id="status-line">Server status: loading...</p>
-      <p id="error-line" class="error" hidden></p>
-    </section>
-
-    <section class="card">
-      <h2>Players Online: <span id="player-count">-</span></h2>
-      <ul id="players-list"></ul>
-      <p id="players-meta" class="meta"></p>
-    </section>
-  </main>
-`
-
 const statusLine = document.querySelector<HTMLParagraphElement>('#status-line')
 const errorLine = document.querySelector<HTMLParagraphElement>('#error-line')
 const playerCount = document.querySelector<HTMLSpanElement>('#player-count')
