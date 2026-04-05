@@ -1,0 +1,5 @@
+Host chillgame.kiwi
+  HostName chillgame.kiwi
+  User ubuntu
+  IdentityFile ~/.ssh/CudaTest.pem
+  IdentitiesOnly yes
