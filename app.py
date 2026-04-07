@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import subprocess
 
+from server.ban import ban_server_player
 from server.kick import kick_server_player
 from server.player import get_server_players
 from server.systemctl import restart_minecraft_admin
@@ -48,6 +49,16 @@ def server_players():
 def server_kick_player(player_name: str, reason: str | None = None):
     try:
         return kick_server_player(run_cmd, SERVICE_NAME, player_name, reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/server/players/{player_name}/ban")
+def server_ban_player(player_name: str, reason: str | None = None):
+    try:
+        return ban_server_player(run_cmd, SERVICE_NAME, player_name, reason)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:

@@ -123,6 +123,11 @@ button:hover {
   gap: 10px;
 }
 
+.player-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .kick-button {
   background: #b91c1c;
   padding: 6px 10px;
@@ -135,6 +140,22 @@ button:hover {
 }
 
 .kick-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.ban-button {
+  background: #7f1d1d;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.ban-button:hover {
+  background: #991b1b;
+}
+
+.ban-button:disabled {
   opacity: 0.65;
   cursor: wait;
 }

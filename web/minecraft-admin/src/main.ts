@@ -47,6 +47,35 @@ async function kickPlayer(playerName: string): Promise<void> {
   }
 }
 
+async function banPlayer(playerName: string): Promise<void> {
+  const confirmed = window.confirm(
+    `Ban ${playerName}? They will be kicked and prevented from rejoining.`
+  )
+  if (!confirmed) {
+    return
+  }
+
+  const reasonInput = window.prompt(`Ban ${playerName}.\nOptional reason:`, 'Banned by admin')
+  if (reasonInput === null) {
+    return
+  }
+
+  const reason = reasonInput.trim()
+  const params = new URLSearchParams()
+  if (reason.length > 0) {
+    params.set('reason', reason)
+  }
+
+  const path = `/api/server/players/${encodeURIComponent(playerName)}/ban${
+    params.toString() ? `?${params.toString()}` : ''
+  }`
+  const response = await fetch(path, { method: 'POST' })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `Failed to ban ${playerName}`)
+  }
+}
+
 
 async function restartAdminService(): Promise<void> {
   const response = await fetch('/api/systemctl/minecraft-admin/restart', { method: 'POST' })
@@ -98,7 +127,29 @@ function renderPlayers(data: PlayersResponse): void {
         })
     })
 
-    li.append(nameSpan, kickButton)
+    const banButton = document.createElement('button')
+    banButton.type = 'button'
+    banButton.className = 'ban-button'
+    banButton.textContent = 'Ban'
+    banButton.addEventListener('click', () => {
+      banButton.disabled = true
+      setError(null)
+
+      void banPlayer(name)
+        .then(() => refresh())
+        .catch((error) => {
+          setError(error instanceof Error ? error.message : `Failed to ban ${name}`)
+        })
+        .finally(() => {
+          banButton.disabled = false
+        })
+    })
+
+    const actions = document.createElement('div')
+    actions.className = 'player-actions'
+    actions.append(kickButton, banButton)
+
+    li.append(nameSpan, actions)
     playersList.append(li)
   }
 }
