@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import subprocess
 
-from player import get_server_players
+from server.player import get_server_players
 
 app = FastAPI()
 
