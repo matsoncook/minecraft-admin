@@ -24,6 +24,28 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>
 }
 
+async function kickPlayer(playerName: string): Promise<void> {
+  const reasonInput = window.prompt(`Kick ${playerName}.\nOptional reason:`, 'Kicked by admin')
+  if (reasonInput === null) {
+    return
+  }
+
+  const reason = reasonInput.trim()
+  const params = new URLSearchParams()
+  if (reason.length > 0) {
+    params.set('reason', reason)
+  }
+
+  const path = `/api/server/players/${encodeURIComponent(playerName)}/kick${
+    params.toString() ? `?${params.toString()}` : ''
+  }`
+  const response = await fetch(path, { method: 'POST' })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `Failed to kick ${playerName}`)
+  }
+}
+
 function renderPlayers(data: PlayersResponse): void {
   if (!playerCount || !playersList || !playersMeta) {
     return
@@ -43,7 +65,30 @@ function renderPlayers(data: PlayersResponse): void {
 
   for (const name of data.players) {
     const li = document.createElement('li')
-    li.textContent = name
+    li.className = 'player-row'
+
+    const nameSpan = document.createElement('span')
+    nameSpan.textContent = name
+
+    const kickButton = document.createElement('button')
+    kickButton.type = 'button'
+    kickButton.className = 'kick-button'
+    kickButton.textContent = 'Kick'
+    kickButton.addEventListener('click', () => {
+      kickButton.disabled = true
+      setError(null)
+
+      void kickPlayer(name)
+        .then(() => refresh())
+        .catch((error) => {
+          setError(error instanceof Error ? error.message : `Failed to kick ${name}`)
+        })
+        .finally(() => {
+          kickButton.disabled = false
+        })
+    })
+
+    li.append(nameSpan, kickButton)
     playersList.append(li)
   }
 }
