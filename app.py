@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import subprocess
 
+from server.kick import kick_server_player
 from server.player import get_server_players
 
 app = FastAPI()
@@ -41,3 +42,12 @@ def server_logs():
 @app.get("/api/server/players")
 def server_players():
     return get_server_players(run_cmd, SERVICE_NAME)
+
+@app.post("/api/server/players/{player_name}/kick")
+def server_kick_player(player_name: str, reason: str | None = None):
+    try:
+        return kick_server_player(run_cmd, SERVICE_NAME, player_name, reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
