@@ -1,0 +1,1 @@
+In the file app.py, I wish to separate all the player logic to a file called player.py
