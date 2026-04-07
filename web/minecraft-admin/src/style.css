@@ -69,6 +69,9 @@ code {
 .actions {
   margin-top: 14px;
   margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 button {
@@ -83,6 +86,14 @@ button {
 
 button:hover {
   background: var(--button-bg-hover);
+}
+
+.admin-button {
+  background: #b45309;
+}
+
+.admin-button:hover {
+  background: #d97706;
 }
 
 #status-line {

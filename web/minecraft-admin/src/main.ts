@@ -14,6 +14,7 @@ const playerCount = document.querySelector<HTMLSpanElement>('#player-count')
 const playersList = document.querySelector<HTMLUListElement>('#players-list')
 const playersMeta = document.querySelector<HTMLParagraphElement>('#players-meta')
 const refreshButton = document.querySelector<HTMLButtonElement>('#refresh-all')
+const restartAdminButton = document.querySelector<HTMLButtonElement>('#restart-admin')
 
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path)
@@ -43,6 +44,15 @@ async function kickPlayer(playerName: string): Promise<void> {
   if (!response.ok) {
     const text = await response.text()
     throw new Error(text || `Failed to kick ${playerName}`)
+  }
+}
+
+
+async function restartAdminService(): Promise<void> {
+  const response = await fetch('/api/systemctl/minecraft-admin/restart', { method: 'POST' })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || 'Failed to restart minecraft-admin service')
   }
 }
 
@@ -126,6 +136,33 @@ async function refresh(): Promise<void> {
 
 refreshButton?.addEventListener('click', () => {
   void refresh()
+})
+
+restartAdminButton?.addEventListener('click', () => {
+  const confirmed = window.confirm(
+    'Restart minecraft-admin service now? This will briefly interrupt the dashboard API.'
+  )
+  if (!confirmed) {
+    return
+  }
+
+  restartAdminButton.disabled = true
+  setError(null)
+
+  void restartAdminService()
+    .then(() => {
+      setTimeout(() => {
+        void refresh()
+      }, 2500)
+    })
+    .catch((error) => {
+      setError(
+        error instanceof Error ? error.message : 'Failed to restart minecraft-admin service'
+      )
+    })
+    .finally(() => {
+      restartAdminButton.disabled = false
+    })
 })
 
 void refresh()
