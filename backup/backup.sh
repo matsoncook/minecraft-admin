@@ -1,0 +1,1 @@
+tar -cvzf world.tar.gz world world_nether world_the_end
