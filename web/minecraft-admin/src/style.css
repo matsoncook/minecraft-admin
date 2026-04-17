@@ -96,6 +96,14 @@ button:hover {
   background: #d97706;
 }
 
+.backup-button {
+  background: #0f766e;
+}
+
+.backup-button:hover {
+  background: #0d9488;
+}
+
 #status-line {
   margin: 0;
 }

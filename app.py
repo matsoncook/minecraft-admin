@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 import subprocess
 
 from server.ban import ban_server_player
+from server.backup import create_world_backup
 from server.kick import kick_server_player
 from server.player import get_server_players
 from server.systemctl import restart_minecraft_admin
@@ -68,5 +69,13 @@ def server_ban_player(player_name: str, reason: str | None = None):
 def systemctl_restart_minecraft_admin():
     try:
         return restart_minecraft_admin(run_cmd)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/server/backup")
+def server_backup():
+    try:
+        return create_world_backup()
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc

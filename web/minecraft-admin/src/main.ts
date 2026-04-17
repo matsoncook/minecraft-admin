@@ -1,6 +1,12 @@
 import './style.css'
 
 type StatusResponse = { status: string }
+type BackupResponse = {
+  ok: boolean
+  archive_path: string
+  size_bytes: number
+  notes?: string[]
+}
 type PlayersResponse = {
   online: number
   players: string[]
@@ -15,6 +21,8 @@ const playersList = document.querySelector<HTMLUListElement>('#players-list')
 const playersMeta = document.querySelector<HTMLParagraphElement>('#players-meta')
 const refreshButton = document.querySelector<HTMLButtonElement>('#refresh-all')
 const restartAdminButton = document.querySelector<HTMLButtonElement>('#restart-admin')
+const backupButton = document.querySelector<HTMLButtonElement>('#create-backup')
+const backupLine = document.querySelector<HTMLParagraphElement>('#backup-line')
 
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path)
@@ -83,6 +91,28 @@ async function restartAdminService(): Promise<void> {
     const text = await response.text()
     throw new Error(text || 'Failed to restart minecraft-admin service')
   }
+}
+
+async function createBackup(): Promise<BackupResponse> {
+  const response = await fetch('/api/server/backup', { method: 'POST' })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || 'Failed to create world backup')
+  }
+  return response.json() as Promise<BackupResponse>
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 1024) {
+    return `${bytes} B`
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`
+  }
+  if (bytes < 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
 }
 
 function renderPlayers(data: PlayersResponse): void {
@@ -213,6 +243,38 @@ restartAdminButton?.addEventListener('click', () => {
     })
     .finally(() => {
       restartAdminButton.disabled = false
+    })
+})
+
+backupButton?.addEventListener('click', () => {
+  const confirmed = window.confirm('Create a world backup tar.gz now?')
+  if (!confirmed) {
+    return
+  }
+
+  backupButton.disabled = true
+  setError(null)
+  if (backupLine) {
+    backupLine.textContent = 'Backup: creating archive...'
+  }
+
+  void createBackup()
+    .then((backup) => {
+      const noteSuffix =
+        backup.notes && backup.notes.length > 0 ? ` (${backup.notes.join('; ')})` : ''
+      if (backupLine) {
+        backupLine.textContent =
+          `Backup: saved ${backup.archive_path} (${formatBytes(backup.size_bytes)})` + noteSuffix
+      }
+    })
+    .catch((error) => {
+      if (backupLine) {
+        backupLine.textContent = 'Backup: failed'
+      }
+      setError(error instanceof Error ? error.message : 'Failed to create world backup')
+    })
+    .finally(() => {
+      backupButton.disabled = false
     })
 })
 
